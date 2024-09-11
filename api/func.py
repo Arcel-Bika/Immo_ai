@@ -26,7 +26,11 @@ Fonctions
     - value_ai(y_test, y_pred):
         Évalue les prédictions avec l'erreur quadratique moyenne.
 """
+from statistics import LinearRegression
+
+import pandas as pd
 from sklearn.metrics import mean_squared_error
+from sklearn.model_selection import train_test_split
 
 
 def data_file(file):
