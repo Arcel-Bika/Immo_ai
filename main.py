@@ -5,42 +5,26 @@ Cette application permet à l'utilisateur de saisir des caractéristiques d'une 
 la taille de la parcelle, le nombre de chambres et de salons, ainsi que la commune et le quartier,
 pour obtenir une estimation du prix via un modèle d'intelligence artificielle (IA).
 
-Le modèle d'IA est entraîné à partir des données précédemment fournies, encodées et traitées avec
-des algorithmes de machine learning.
-
 Modules
 -------
     - streamlit : pour créer l'interface utilisateur
     - pandas : pour gérer les données sous forme de DataFrame
     - func : un module externe qui contient les fonctions `data_encoder` et `output_data`
              ainsi qu'un modèle de régression linéaire (`reg_model`).
-
-Fonctions
----------
-    - st.title : Affiche le titre de l'application.
-    - st.text : Affiche une brève description de l'application.
-    - st.text_input : Permet à l'utilisateur de saisir des informations sur les caractéristiques de la maison.
-    - st.error : Affiche un message d'erreur si les données saisies ne sont pas valides.
-    - st.write : Affiche le résultat de la prédiction du modèle.
-
-Données saisies par l'utilisateur
----------------------------------
-    - Commune : La commune où se trouve la maison.
-    - Quartier : Le quartier où se trouve la maison.
-    - Taille de la parcelle : Taille du terrain de la maison (doit être un nombre entier).
-    - Nombre de salons : Le nombre de salons dans la maison (doit être un nombre entier).
-    - Nombre de chambres : Le nombre de chambres dans la maison (doit être un nombre entier).
-
-Le modèle prédira ensuite le prix estimé en fonction de ces caractéristiques.
 """
 
-from api import func
+from api.func import load_or_train_model, data_encoder, output_data
 import streamlit as st
 import pandas as pd
+
 
 # Titre
 st.title("Immo :blue[AI] 🤖​")
 st.text("Recherchez, trouvez selon votre budget")
+
+# Vérifier et charger le modèle
+reg_model = load_or_train_model()
+
 
 # Initialiser les variables si elles n'existent pas encore dans st.session_state
 if 'visibility' not in st.session_state:
@@ -53,7 +37,7 @@ if 'placeholder' not in st.session_state:
 # Création des colonnes
 col1, col2 = st.columns(2)
 
-# Données à rechercher
+# Données saisies par l'utilisateur
 with col1:
     commune = st.text_input(
         "Entrez la commune",
@@ -92,9 +76,9 @@ if taille_parcelle.isdigit() and nb_salon.isdigit() and nb_chambres.isdigit():
     nb_salon = int(nb_salon)
     nb_chambres = int(nb_chambres)
 else:
-    st.error("Veuillez entrer des nombres valides pour les salons, les chambres et la taille de la parcelle.")
+    st.error("Veuillez entrer des valeurs numériques valides.")
 
-# Exemple des données entrées par l'utilisateur
+# Données utilisateur pour la prédiction
 user_data = {
     'nb_chambres': [nb_chambres],
     'nb_salon': [nb_salon],
@@ -105,13 +89,12 @@ user_data = {
 
 user_df = pd.DataFrame(user_data)
 
-# Encodage des données
-user_df_encoded = func.data_encoder(user_df)
+# Encodage
+user_df_encoded = data_encoder(user_df)
 
-# Vérification de l'existence du modèle
-if hasattr(func, 'reg_model'):
-    # Prédiction du prix de la maison
-    predicted_price = func.output_data(func.reg_model, user_df_encoded)
+# Prédiction avec le modèle
+if reg_model:
+    predicted_price = output_data(reg_model, user_df_encoded)
     st.write(f"Le prix estimé pour la maison est : {predicted_price[0]} $")
 else:
-    st.error("Le modèle de régression n'est pas disponible.")
+    st.error("Le modèle n'est pas prêt.")
