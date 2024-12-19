@@ -51,8 +51,8 @@ with col1:
         disabled=st.session_state.disabled,
         placeholder=st.session_state.placeholder,
     )
-    taille_parcelle = st.text_input(
-        "Entrez la taille de la parcelle",
+    taille_maison = st.text_input(
+        "Entrez la taille de la maison",
         label_visibility=st.session_state.visibility,
         disabled=st.session_state.disabled,
         placeholder=st.session_state.placeholder,
@@ -71,8 +71,8 @@ with col2:
     )
 
 # Vérification des données
-if taille_parcelle.isdigit() and nb_salon.isdigit() and nb_chambres.isdigit():
-    taille_parcelle = int(taille_parcelle)
+if taille_maison.isdigit() and nb_salon.isdigit() and nb_chambres.isdigit():
+    taille_parcelle = int(taille_maison)
     nb_salon = int(nb_salon)
     nb_chambres = int(nb_chambres)
 else:
@@ -82,7 +82,7 @@ else:
 user_data = {
     'nb_chambres': [nb_chambres],
     'nb_salon': [nb_salon],
-    'taille_parcelle': [taille_parcelle],
+    'taille_maison': [taille_maison],
     'commune': [commune],
     'quartier': [quartier]
 }

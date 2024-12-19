@@ -1,36 +1,9 @@
-"""
-Description:
-___________
-    Ce fichier contient toutes les fonctions principales du programme Immo AI.
-
-Fonctions
----------
-    - data_file(file):
-        Charge et retourne les données à partir d'un fichier CSV.
-
-    - select_features(data):
-        Sélectionne les features pertinentes pour l'entraînement du modèle.
-
-    - data_encoder(X):
-        Encode les données catégorielles.
-
-    - test(X, y):
-        Divise les données en ensembles d'entraînement et de test.
-
-    - model(X_train, y_train):
-        Entraîne un modèle de régression linéaire.
-
-    - output_data(model, X_test):
-        Retourne les prédictions du modèle.
-
-    - load_or_train_model():
-        Charge le modèle existant ou entraîne un nouveau si nécessaire.
-"""
-
+from sklearn.neighbors import KNeighborsRegressor
 from sklearn.linear_model import LinearRegression
 import pandas as pd
 import joblib
 import os
+import numpy as np
 
 
 def data_file(file):
@@ -45,7 +18,7 @@ def select_features(data):
     Sélectionne les features pertinentes et la cible.
     Ajuste les noms de colonnes si nécessaire.
     """
-    X = data[['nb_chambres', 'nb_salon', 'taille_parcelle', 'commune', 'quartier']]
+    X = data[['nb_chambres', 'nb_salon', 'taille_maison', 'commune', 'quartier']]
     y = data['prix']
     return X, y
 
@@ -67,11 +40,19 @@ def test(X, y):
 
 def model(X_train, y_train):
     """
-    Entraîne un modèle de régression linéaire.
+    Entraîne un modèle KNN.
     """
-    reg_model = LinearRegression()
-    reg_model.fit(X_train, y_train)
-    return reg_model
+    knn_model = KNeighborsRegressor(n_neighbors=5)
+    knn_model.fit(X_train, y_train)
+    print(knn_model)
+    return knn_model
+
+
+def model_score(X_test, y_test, model):
+    """
+    Retourne le score du modèle.
+    """
+    return model.score(X_test, y_test)
 
 
 def output_data(model, X_test):
@@ -85,15 +66,14 @@ def load_or_train_model():
     """
     Charge le modèle existant s'il existe, sinon l'entraîne et sauvegarde.
     """
-    model_path = "reg_model.pkl"
+    model_path = "knn_model.pkl"
 
     if os.path.exists(model_path):
         # Charger le modèle existant
         print("Chargement du modèle existant...")
-        reg_model = joblib.load(model_path)
+        knn_model = joblib.load(model_path)
     else:
         # Entraîner un nouveau modèle
-        print("Entraînement du modèle...")
         data = pd.read_csv('assets//source.csv', delimiter=';')
         print("Colonnes disponibles dans le fichier CSV :")
         print(data.columns)
@@ -101,10 +81,11 @@ def load_or_train_model():
         X, y = select_features(data)
         X = data_encoder(X)
         X_train, X_test, y_train, y_test = test(X, y)
-        reg_model = model(X_train, y_train)
+        knn_model = model(X_train, y_train)
+        print("Le score est de : ", model_score(X_test, y_test, knn_model))
 
         # Sauvegarder le modèle
-        joblib.dump(reg_model, model_path)
+        joblib.dump(knn_model, model_path)
         print("Modèle entraîné et sauvegardé.")
 
-    return reg_model
+    return knn_model
