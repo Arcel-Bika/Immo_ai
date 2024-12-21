@@ -1,9 +1,7 @@
 from sklearn.neighbors import KNeighborsRegressor
-from sklearn.linear_model import LinearRegression
 import pandas as pd
 import joblib
 import os
-import numpy as np
 
 
 def data_file(file):
